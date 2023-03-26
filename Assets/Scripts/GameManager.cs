@@ -27,10 +27,14 @@ public class GameManager : MonoBehaviour
         {0,-1 }
     };
 
-    public int randomSeed = lines*columns;
+    public int randomSeed = lines*columns*1145;
 
     public static int currentScore = 0;
     //public static int MAXScore = 0;
+    public int numMAXLevel = 0;
+    public static bool helpMode_1 = false;
+    public static bool helpMode_2 = true;
+    public int helpModeIndex_1 = 4;
 
     public static List <List<int>> statesInCells = new List<List<int>>();
 
@@ -52,6 +56,7 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
         if(initialize)
         {
             createdNums.Clear();
@@ -161,16 +166,51 @@ public class GameManager : MonoBehaviour
                     //Debug.Log("随机经过第" + i + "行第" + j + "列");
                     if (statesInCells[i][j] == 0)
                     {
-                        createdNums[i][j] = Instantiate(Nums[r3 % 2], new Vector3(Map.transform.position.x + i * sizeOfCell * 1.05f, Map.transform.position.y + j * sizeOfCell * 1.05f, 0), Map.transform.rotation, Map.transform);//生成0或1号数字，即2或4
+                        int generatedNumLevel = (r3 % 2) + 1;
+                        if(helpMode_1)
+                        {
+                            if (numMAXLevel >= helpModeIndex_1)
+                            {
+                                generatedNumLevel += (numMAXLevel - helpModeIndex_1 + 1);
+                            }
+                        }
+                        if(helpMode_2)
+                        {
+                            
+                            generatedNumLevel = (r3 % 3) + 1;
+                        }
+                        createdNums[i][j] = Instantiate(Nums[generatedNumLevel-1], new Vector3(Map.transform.position.x + i * sizeOfCell * 1.05f, Map.transform.position.y + j * sizeOfCell * 1.05f, 0), Map.transform.rotation, Map.transform);//生成0或1号数字，即2或4
                         countNums++;
                         statesInCells[i][j] = 1;
-                        createdNums[i][j].GetComponent<NumsMover>().level = (r3 % 2) + 1;
+                        createdNums[i][j].GetComponent<NumsMover>().level = generatedNumLevel;
+                        if(createdNums[i][j].GetComponent<NumsMover>().level > numMAXLevel)
+                        {
+                            numMAXLevel = createdNums[i][j].GetComponent<NumsMover>().level;
+                        }
                         createdNums[i][j].GetComponent<NumsMover>().num = 1;
                         for(int k=0;k< createdNums[i][j].GetComponent<NumsMover>().level;k++)
                         {
                             createdNums[i][j].GetComponent<NumsMover>().num *= 2;
                         }
-                        
+                        if(helpMode_1)
+                        {
+                            if (numMAXLevel >= helpModeIndex_1)
+                            {
+                                for (int r = 0; r < lines; r++)
+                                {
+                                    for (int t = 0; t < columns; t++)
+                                    {
+                                        if (statesInCells[r][t] == 1 && createdNums[r][t].GetComponent<NumsMover>().level <= (numMAXLevel - helpModeIndex_1 + 1))
+                                        {
+                                            Destroy(createdNums[r][t]);
+                                            countNums--;
+                                            statesInCells[r][t] = 0;
+                                            Debug.Log("剩余" + countNums + "个数字");
+                                        }
+                                    }
+                                }
+                            }
+                        }
                         break;
                     }
                     else
@@ -358,6 +398,10 @@ public class GameManager : MonoBehaviour
                 temp.GetComponent<NumsMover>().level = createdNums[mm + directions[direction, 0]][nn + directions[direction, 1]].GetComponent<NumsMover>().level+1;
                 Destroy(createdNums[mm + directions[direction, 0]][nn + directions[direction, 1]]);
                 createdNums[mm + directions[direction, 0]][nn + directions[direction, 1]] = temp;
+                if (createdNums[mm + directions[direction, 0]][nn + directions[direction, 1]].GetComponent<NumsMover>().level > numMAXLevel)
+                {
+                    numMAXLevel = createdNums[mm + directions[direction, 0]][nn + directions[direction, 1]].GetComponent<NumsMover>().level;
+                }
                 createdNums[mm + directions[direction, 0]][nn + directions[direction, 1]].GetComponent<NumsMover>().num = 1;
                 for (int k = 0; k < createdNums[mm + directions[direction, 0]][nn + directions[direction, 1]].GetComponent<NumsMover>().level; k++)
                 {

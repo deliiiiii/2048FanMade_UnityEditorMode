@@ -1674,6 +1674,9 @@ MonoBehaviour:
   countMove: 0
   countIntegrate: 0
   randomSeed: 121
+  numMAXLevel: 0
+  helpMode_1: 0
+  helpModeIndex_1: 8
   Map: {fileID: 764938507}
   Nums:
   - {fileID: 5297357626522450244, guid: c1de8b3715974fc4488a0ee13a8a4676, type: 3}
